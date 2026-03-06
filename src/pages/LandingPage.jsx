@@ -251,7 +251,7 @@ function LandingPage() {
                         </div>
                     </div>
                 </section>
-<div className="relative h-[50px] mb-15 overflow-visible">
+<div className="relative h-[50px] mb-0 overflow-visible">
 
 <div className="relativew-full py-0 overflow-hidden z-10">
   <LogoLoop
