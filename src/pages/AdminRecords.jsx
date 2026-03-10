@@ -291,7 +291,7 @@ function AdminRecords() {
                   <th className="px-6 py-3 text-sm font-semibold text-gray-600">PR Date</th>
                   <th className="px-6 py-3 text-sm font-semibold text-gray-600">Indenter</th>
                   <th className="px-6 py-3 text-sm font-semibold text-gray-600">Material</th>
-                  <th className="px-6 py-3 text-sm font-semibold text-gray-600">Project</th>
+                  <th className="px-6 py-3 text-sm font-semibold text-gray-600">Budget Head</th>
                   <th className="px-6 py-3 text-sm font-semibold text-gray-600">Approval ₹</th>
                   <th className="px-6 py-3 text-sm font-semibold text-gray-600">Utilization ₹</th>
                   <th className="px-6 py-3 text-sm font-semibold text-gray-600">Remaining ₹</th>
