@@ -470,7 +470,7 @@ const totalRemaining = totalApproval - totalUtilization;
 
   {viewMode === "records" && (
   <>
-    <div className="bg-white shadow rounded-xl flex flex-col h-[70vh]">
+    <div className="bg-white shadow rounded-xl flex flex-col h-[calc(100vh-200px)]">
       <div className="overflow-auto flex-1">
         
           
