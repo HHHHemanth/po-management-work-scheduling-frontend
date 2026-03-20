@@ -265,14 +265,14 @@ const totalRemaining = totalApproval - totalUtilization;
   
 
   return (
-    <div className="space-y-6 p-4 md:p-6">
+    <div className="space-y-6">
     <div className="flex justify-between items-center">
   <h2 className="text-2xl font-bold text-gray-800">
     {viewMode === "records" ? "Records" : "Documents"}
   </h2>
 
-  <div className="flex flex-wrap gap-3">
-    <div className="flex flex-wrap gap-3 items-center w-full">
+  <div className="flex space-x-3">
+    <div className="flex flex-wrap gap-3 ml-6 items-center relative z-50">
 
   {/* INDENTOR */}
   <div className="flex flex-wrap gap-3 ml-6 items-center">
@@ -472,11 +472,8 @@ const totalRemaining = totalApproval - totalUtilization;
   <>
     <div className="bg-white shadow rounded-xl flex flex-col">
 
-      
+      <div className="overflow-y-auto flex-1">
         
-          <div className="overflow-auto flex-1">
-  <div className="min-w-[1000px]">
-  
           
             <table className="min-w-full text-left">
 
@@ -727,7 +724,6 @@ Delete
             </table>
           </div>
         </div>
-        </div>
 
         <div className="bg-white shadow rounded-xl p-6 flex justify-between text-lg font-semibold">
   <div className="text-blue-600">
@@ -751,9 +747,7 @@ Delete
       {viewMode === "documents" && (
         <div className="bg-white shadow rounded-xl overflow-hidden h-[70vh] flex flex-col">
 
-          
-            <div className="overflow-auto flex-1">
-              <div className="min-w-[900px]">
+          <div className="overflow-y-auto flex-1">
             <table className="min-w-full text-left">
 
               <thead className="bg-gray-100 sticky top-0 z-10">
@@ -836,11 +830,9 @@ Delete
                   </tr>
                 ))}
               </tbody>
-            
 
             </table>
           </div>
-        </div>
         </div>
       )}
       {showModal && (
