@@ -722,9 +722,8 @@ Delete
 
             </table>
           </div>
-        </div>
 
-        <div className="bg-white shadow rounded-xl p-4 flex flex-wrap justify-between text-sm md:text-lg font-semibold sticky bottom-0 z-20">
+          <div className="bg-white shadow rounded-xl p-4 flex flex-wrap justify-between text-sm md:text-lg font-semibold sticky bottom-0 z-20">
   <div className="text-blue-600">
     Total Approval: ₹ {totalApproval}
   </div>
@@ -737,6 +736,13 @@ Delete
     Remaining Budget: ₹ {totalRemaining}
   </div>
 </div>
+        
+      
+
+          
+        </div>
+
+        
         </>
       )}
 
