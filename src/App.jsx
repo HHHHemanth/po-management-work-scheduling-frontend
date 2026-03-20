@@ -14,6 +14,7 @@ import AdminUsers from "./pages/AdminUsers";
 import AdminLayout from "./pages/AdminLayout";
 import TrashRecords from "./pages/TrashRecords";
 import Works from "./pages/Works";
+import Profile from "./pages/Profile";
 import WorkDocuments from "./pages/WorkDocuments";
 
 function App() {
@@ -51,6 +52,7 @@ function App() {
         
           <Route path="works" element={<Works />} />
           <Route path="trash" element={<TrashRecords />} />
+          <Route path="profile" element={<Profile />} />
         </Route>
 
         <Route
@@ -67,6 +69,7 @@ function App() {
   <Route path="trash" element={<TrashRecords />} />
   <Route path="work-documents" element={<WorkDocuments />} />
   <Route path="works" element={<Works />} />
+  <Route path="profile" element={<Profile />} />
   
 </Route>
 
@@ -82,6 +85,7 @@ function App() {
   <Route index element={<AssociateDashboard />} />
   <Route path="works" element={<Works />} />
   <Route path="work-documents" element={<WorkDocuments />} />
+  <Route path="profile" element={<Profile />} />
 </Route>
 
 

@@ -95,7 +95,7 @@ function LandingPage() {
                             showBorder={false}
                             className="text-3xl md:text-3xl mb-1 drop-shadow-[0_4px_20px_rgba(0,0,0,0.6)]"
                         >
-                            PO MANAGEMENT SYSTEM
+                            TECH WALNUT PROJECT MANAGEMENT SYSTEM
                         </GradientText>
                         <p className="text-gray-200 mb-10">
                             Smart, Secure, Efficient purchase order management.
@@ -293,7 +293,7 @@ function LandingPage() {
                                     <img src="/cmtilogo.png" alt="CMTI Logo" className="h-10 bg-white/10 p-1.5 rounded-lg" />
                                     <img src="/mhilogo.png" alt="MHI Logo" className="h-10 bg-white/10 p-1.5 rounded-lg" />
                                 </div>
-                                <h3 className="text-xl font-bold text-white mb-2">PO Management System</h3>
+                                <h3 className="text-xl font-bold text-white mb-2">TECH WALNUT PROJECT MANAGEMENT SYSTEM</h3>
                                 <p className="text-sm text-slate-400 max-w-sm mb-4">
                                     Designed for scalable enterprise-level PR/PO and Task Management workflows.
                                 </p>

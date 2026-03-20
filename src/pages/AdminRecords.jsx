@@ -23,7 +23,15 @@ function AdminRecords() {
   const [documentsMap, setDocumentsMap] = useState({});
   const location = useLocation();
   const [records, setRecords] = useState([]);
+  const [indentorFilter, setIndentorFilter] = useState([]);
+  const [budgetFilter, setBudgetFilter] = useState([]);
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
+  const [searchTerm, setSearchTerm] = useState(""); 
   const [staffs, setStaffs] = useState([]);
+  const [showIndentorDropdown, setShowIndentorDropdown] = useState(false);
+  const [showBudgetDropdown, setShowBudgetDropdown] = useState(false);
+
 
   const [viewMode, setViewMode] = useState(
     location.state?.viewMode || "records"
@@ -67,15 +75,14 @@ function AdminRecords() {
 }, []);
 
   useEffect(() => {
-  if (viewMode === "documents" && records.length > 0) {
+  if (records.length > 0) {
     records.forEach(record => {
       if (!documentsMap[record._id]) {
         fetchDocumentsForRecord(record._id);
       }
-    } 
-  );
+    });
   }
-}, [viewMode, records, ]);
+}, [records]);
 
   const fetchRecords = async () => {
     try {
@@ -206,7 +213,56 @@ function AdminRecords() {
     console.error("Error fetching documents:", err);
   }
 };
+  
+  const filteredRecords = records.filter((record) => {
 
+  // ✅ Indentor filter
+  const matchesIndentor =
+    indentorFilter.length === 0 ||
+    indentorFilter.includes(record.indenter_name);
+
+  // ✅ Budget filter
+  const matchesBudget =
+    budgetFilter.length === 0 ||
+    budgetFilter.includes(record.project_head);
+
+  // ✅ Date parsing
+  const recordDate = record.created_at
+  ? new Date(record.created_at)
+  : null;
+
+  const fromDate = dateFrom ? new Date(dateFrom + "T00:00:00") : null;
+  const toDate = dateTo ? new Date(dateTo + "T23:59:59") : null;
+
+  const matchesDate =
+    (!fromDate || (recordDate && recordDate >= fromDate)) &&
+    (!toDate || (recordDate && recordDate <= toDate));
+
+  // ✅ Search filter
+  const matchesSearch =
+    !searchTerm ||
+    record.pr_po_no?.toLowerCase().includes(searchTerm.toLowerCase());
+
+  return matchesIndentor && matchesBudget && matchesDate && matchesSearch;
+});
+const records25k = filteredRecords.filter(
+  (r) => !r.pr_po_no?.toLowerCase().includes("po")
+);
+
+const records25kPlus = filteredRecords.filter(
+  (r) => r.pr_po_no?.toLowerCase().includes("po")
+);
+
+const totalApproval = filteredRecords.reduce(
+  (sum, r) => sum + (r.approval_rs || 0), 0
+);
+
+const totalUtilization = filteredRecords.reduce(
+  (sum, r) => sum + (r.utilization_rs || 0), 0
+);
+
+const totalRemaining = totalApproval - totalUtilization;
+  
 
   return (
     <div className="space-y-6">
@@ -216,6 +272,137 @@ function AdminRecords() {
   </h2>
 
   <div className="flex space-x-3">
+    <div className="flex flex-wrap gap-3 ml-6 items-center relative z-50">
+
+  {/* INDENTOR */}
+  <div className="flex flex-wrap gap-3 ml-6 items-center">
+
+  {/* INDENTOR DROPDOWN */}
+  <div className="relative">
+    <p className="text-xs text-gray-500">Indentor</p>
+
+    <button
+      onClick={() => setShowIndentorDropdown(!showIndentorDropdown)}
+      className="border p-2 rounded w-44 text-left bg-white"
+    >
+      {indentorFilter.length === 0 ? "All" : `${indentorFilter.length} selected`}
+    </button>
+
+    {showIndentorDropdown && (
+      <div className="absolute z-50 bg-white border rounded shadow w-44 max-h-60 overflow-auto">
+        
+        {/* ALL OPTION */}
+        <label className="flex items-center px-2 py-1">
+          <input
+            type="checkbox"
+            checked={indentorFilter.length === 0}
+            onChange={() => setIndentorFilter([])}
+          />
+          <span className="ml-2">All</span>
+        </label>
+
+        {[...new Set(records.map(r => r.indenter_name))].map((name) => (
+          <label key={name} className="flex items-center px-2 py-1">
+            <input
+              type="checkbox"
+              checked={indentorFilter.includes(name)}
+              onChange={() => {
+                if (indentorFilter.includes(name)) {
+                  setIndentorFilter(indentorFilter.filter(i => i !== name));
+                } else {
+                  setIndentorFilter([...indentorFilter, name]);
+                }
+              }}
+            />
+            <span className="ml-2">{name}</span>
+          </label>
+        ))}
+      </div>
+    )}
+  </div>
+
+  {/* BUDGET DROPDOWN */}
+  <div className="relative">
+    <p className="text-xs text-gray-500">Budget</p>
+
+    <button
+      onClick={() => setShowBudgetDropdown(!showBudgetDropdown)}
+      className="border p-2 rounded w-44 text-left bg-white"
+    >
+      {budgetFilter.length === 0 ? "All" : `${budgetFilter.length} selected`}
+    </button>
+
+    {showBudgetDropdown && (
+      <div className="absolute z-10 bg-white border rounded shadow w-44 max-h-60 overflow-auto">
+        
+        {/* ALL OPTION */}
+        <label className="flex items-center px-2 py-1">
+          <input
+            type="checkbox"
+            checked={budgetFilter.length === 0}
+            onChange={() => setBudgetFilter([])}
+          />
+          <span className="ml-2">All</span>
+        </label>
+
+        {[...new Set(records.map(r => r.project_head))].map((head) => (
+          <label key={head} className="flex items-center px-2 py-1">
+            <input
+              type="checkbox"
+              checked={budgetFilter.includes(head)}
+              onChange={() => {
+                if (budgetFilter.includes(head)) {
+                  setBudgetFilter(budgetFilter.filter(b => b !== head));
+                } else {
+                  setBudgetFilter([...budgetFilter, head]);
+                }
+              }}
+            />
+            <span className="ml-2">{head}</span>
+          </label>
+        ))}
+      </div>
+    )}
+  </div>  </div>
+
+  {/* DATE FROM */}
+  <div>
+    <p className="text-xs text-gray-500">From</p>
+    <input
+      type="date"
+      value={dateFrom}
+      onChange={(e) => setDateFrom(e.target.value)}
+      className="border p-2 rounded"
+    />
+  </div>
+
+  {/* DATE TO */}
+  <div>
+    <p className="text-xs text-gray-500">To</p>
+    <input
+      type="date"
+      value={dateTo}
+      onChange={(e) => setDateTo(e.target.value)}
+      className="border p-2 rounded"
+    />
+  </div>
+
+  {/* SEARCH */}
+  <div>
+    <p className="text-xs text-gray-500">Search</p>
+    <input
+      type="text"
+      placeholder="PR/PO"
+      value={searchTerm}
+      onChange={(e) => setSearchTerm(e.target.value)}
+      className="border p-2 rounded"
+    />
+  </div>
+
+</div>
+
+  
+
 
     <button
       onClick={() => setViewMode("records")}
@@ -239,7 +426,9 @@ function AdminRecords() {
       Documents
     </button>
 
-    {viewMode === "records" && (
+    
+    
+  {viewMode === "records" && (
   <button
     onClick={() =>
       navigate(role === "admin" ? "/admin/trash" : "/staff/trash")
@@ -279,77 +468,280 @@ function AdminRecords() {
 
 
 
-      {viewMode === "records" && (
-        <div className="bg-white shadow rounded-xl overflow-hidden h-[70vh] flex flex-col">
+  {viewMode === "records" && (
+  <>
+    <div className="bg-white shadow rounded-xl h-[70vh] flex flex-col">
 
-          <div className="overflow-y-auto flex-1">
+      <div className="overflow-y-auto flex-1">
+          
             <table className="min-w-full text-left">
 
               <thead className="bg-gray-100 sticky top-0 z-10">
-                <tr>
-                  <th className="px-6 py-3 text-sm font-semibold text-gray-600">PR/PO No</th>
-                  <th className="px-6 py-3 text-sm font-semibold text-gray-600">PR Date</th>
-                  <th className="px-6 py-3 text-sm font-semibold text-gray-600">Indenter</th>
-                  <th className="px-6 py-3 text-sm font-semibold text-gray-600">Material</th>
-                  <th className="px-6 py-3 text-sm font-semibold text-gray-600">Budget Head</th>
-                  <th className="px-6 py-3 text-sm font-semibold text-gray-600">Approval ₹</th>
-                  <th className="px-6 py-3 text-sm font-semibold text-gray-600">Utilization ₹</th>
-                  <th className="px-6 py-3 text-sm font-semibold text-gray-600">Remaining ₹</th>
-                  <th className="px-6 py-3 text-sm font-semibold text-gray-600">Staff</th>
-                  <th className="px-6 py-3 text-sm font-semibold text-gray-600">Actions</th>
-                </tr>
+<tr>
+<th className="px-6 py-3 text-sm font-semibold text-gray-600">Indenter</th>
+<th className="px-6 py-3 text-sm font-semibold text-gray-600">Staff</th>
+<th className="px-6 py-3 text-sm font-semibold text-gray-600">PR/PO No</th>
+<th className="px-6 py-3 text-sm font-semibold text-gray-600">PR Date</th>
+<th className="px-6 py-3 text-sm font-semibold text-gray-600">Material</th>
+<th className="px-6 py-3 text-sm font-semibold text-gray-600">Budget Head</th>
+<th className="px-6 py-3 text-sm font-semibold text-gray-600">
+  Purpose
+</th>
+<th className="px-6 py-3 text-sm font-semibold text-gray-600">Approval ₹</th>
+<th className="px-6 py-3 text-sm font-semibold text-gray-600">Utilization ₹</th>
+<th className="px-6 py-3 text-sm font-semibold text-gray-600">Remaining ₹</th>
+<th className="px-6 py-3 text-sm font-semibold text-gray-600">Documents</th>
+<th className="px-6 py-3 text-sm font-semibold text-gray-600">Actions</th>
+</tr>
+              
+                  
+                
               </thead>
 
               <tbody>
-                {records.map((record) => (
-                  <tr key={record._id} className="border-t hover:bg-gray-50">
-                    <td className="px-6 py-4">{record.pr_po_no}</td>
-                    <td className="px-6 py-4">
-                      {record.created_at
-                        ? new Date(record.created_at).toLocaleDateString("en-GB")
-                        : "-"}
-                    </td>
-                    <td className="px-6 py-4">{record.indenter_name}</td>
-                    <td className="px-6 py-4">{record.item_material}</td>
-                    <td className="px-6 py-4">{record.project_head}</td>
-                    <td className="px-6 py-4">₹ {record.approval_rs}</td>
-                    <td className="px-6 py-4">₹ {record.utilization_rs}</td>
-                    <td className="px-6 py-4">₹ {record.remaining}</td>
-                    <td className="px-6 py-4">{record.staff_id}</td>
-                    <td className="px-6 py-4 space-x-3">
-                      {(role === "admin" || record.staff_id === staffId) && (
-                        <>
-                          <button
-                            onClick={() => {
-                              setEditingId(record._id);
-                              setFormData({
-                                ...record,
-                                created_at: record.created_at?.split("T")[0] || ""
-                              });
-                              setShowModal(true);
-                            }}
-                            className="text-blue-600 hover:underline mr-3"
-                          >
-                            Edit
-                          </button>
 
-                          <button
-                            onClick={() => setDeleteRecordModal(record)}
-                            className="text-red-600 hover:underline"
-                          >
-                            Delete
-                          </button>
-                        </>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
+<tr>
+  <td colSpan="11" className="px-6 py-3 font-bold bg-gray-200">
+    25,000
+  </td>
+</tr>
+
+{records25k.map((record) => (
+<tr key={record._id} className="border-t hover:bg-gray-50">
+
+<td className="px-6 py-4">{record.indenter_name}</td>
+
+<td className="px-6 py-4">{record.staff_id}</td>
+
+<td className="px-6 py-4">{record.pr_po_no}</td>
+
+<td className="px-6 py-4">
+{record.created_at
+? new Date(record.created_at).toLocaleDateString("en-GB")
+: "-"}
+</td>
+
+<td className="px-6 py-4">{record.item_material}</td>
+
+<td className="px-6 py-4">{record.project_head}</td>
+<td className="px-6 py-4 text-blue-600 font-medium">
+  {record.purpose || "-"}
+</td>
+
+<td className="px-6 py-4">₹ {record.approval_rs}</td>
+
+<td className="px-6 py-4">₹ {record.utilization_rs}</td>
+
+<td className="px-6 py-4">
+₹ {(record.approval_rs || 0) - (record.utilization_rs || 0)}
+</td>
+
+{/* DOCUMENT COLUMN */}
+<td className="px-6 py-4">
+{documentsMap[record._id]?.length > 0 ? (
+documentsMap[record._id].map((doc) => (
+<div key={doc.document_id} className="flex gap-2 text-xs mb-1">
+
+<button
+onClick={async () => {
+const fileUrl = await viewDocument(record._id, doc.document_id);
+window.open(fileUrl, "_blank");
+}}
+className="text-blue-600 hover:underline"
+>
+View
+</button>
+
+<button
+onClick={() => handleDocumentDelete(record._id, doc)}
+className="text-red-600 hover:underline"
+>
+Delete
+</button>
+
+</div>
+))
+) : (
+<span className="text-gray-400">No Docs</span>
+)}
+
+<button
+onClick={() => {
+setUploadRecordId(record._id);
+setShowUploadModal(true);
+}}
+className="mt-2 px-2 py-1 bg-green-600 text-white rounded text-xs"
+>
+Upload
+</button>
+</td>
+
+{/* ACTION COLUMN */}
+<td className="px-6 py-4 space-x-3">
+
+{(role === "admin" || record.staff_id === staffId) && (
+<>
+<button
+onClick={() => {
+setEditingId(record._id);
+setFormData({
+...record,
+created_at: record.created_at?.split("T")[0] || ""
+});
+setShowModal(true);
+}}
+className="text-blue-600 hover:underline mr-3"
+>
+Edit
+</button>
+
+<button
+onClick={() => setDeleteRecordModal(record)}
+className="text-red-600 hover:underline"
+>
+Delete
+</button>
+</>
+)}
+
+</td>
+
+</tr>
+))}
+
+<tr>
+  <td colSpan="11" className="px-6 py-3 font-bold bg-gray-200">
+    25,000+
+  </td>
+</tr>
+
+{records25kPlus.map((record) => ( 
+  <tr key={record._id} className="border-t hover:bg-gray-50">
+
+<td className="px-6 py-4">{record.indenter_name}</td>
+
+<td className="px-6 py-4">{record.staff_id}</td>
+
+<td className="px-6 py-4">{record.pr_po_no}</td>
+
+<td className="px-6 py-4">
+{record.created_at
+? new Date(record.created_at).toLocaleDateString("en-GB")
+: "-"}
+</td>
+
+<td className="px-6 py-4">{record.item_material}</td>
+
+<td className="px-6 py-4">{record.project_head}</td>
+<td className="px-6 py-4 text-blue-600 font-medium">
+  {record.purpose || "-"}
+</td>
+
+<td className="px-6 py-4">₹ {record.approval_rs}</td>
+
+<td className="px-6 py-4">₹ {record.utilization_rs}</td>
+
+<td className="px-6 py-4">
+₹ {(record.approval_rs || 0) - (record.utilization_rs || 0)}
+</td>
+
+{/* DOCUMENT COLUMN */}
+<td className="px-6 py-4">
+{documentsMap[record._id]?.length > 0 ? (
+documentsMap[record._id].map((doc) => (
+<div key={doc.document_id} className="flex gap-2 text-xs mb-1">
+
+<button
+onClick={async () => {
+const fileUrl = await viewDocument(record._id, doc.document_id);
+window.open(fileUrl, "_blank");
+}}
+className="text-blue-600 hover:underline"
+>
+View
+</button>
+
+<button
+onClick={() => handleDocumentDelete(record._id, doc)}
+className="text-red-600 hover:underline"
+>
+Delete
+</button>
+
+</div>
+))
+) : (
+<span className="text-gray-400">No Docs</span>
+)}
+
+<button
+onClick={() => {
+setUploadRecordId(record._id);
+setShowUploadModal(true);
+}}
+className="mt-2 px-2 py-1 bg-green-600 text-white rounded text-xs"
+>
+Upload
+</button>
+</td>
+
+{/* ACTION COLUMN */}
+<td className="px-6 py-4 space-x-3">
+
+{(role === "admin" || record.staff_id === staffId) && (
+<>
+<button
+onClick={() => {
+setEditingId(record._id);
+setFormData({
+...record,
+created_at: record.created_at?.split("T")[0] || ""
+});
+setShowModal(true);
+}}
+className="text-blue-600 hover:underline mr-3"
+>
+Edit
+</button>
+
+<button
+onClick={() => setDeleteRecordModal(record)}
+className="text-red-600 hover:underline"
+>
+Delete
+</button>
+</>
+)}
+
+</td>
+
+</tr>
+))}
+
+</tbody>
 
             </table>
           </div>
         </div>
+
+        <div className="bg-white shadow rounded-xl p-6 flex justify-between text-lg font-semibold">
+  <div className="text-blue-600">
+    Total Approval: ₹ {totalApproval}
+  </div>
+
+  <div className="text-red-600">
+    Total Utilization: ₹ {totalUtilization}
+  </div>
+
+  <div className="text-green-600">
+    Remaining Budget: ₹ {totalRemaining}
+  </div>
+</div>
+        </>
       )}
+
+    
+ 
 
       {viewMode === "documents" && (
         <div className="bg-white shadow rounded-xl overflow-hidden h-[70vh] flex flex-col">
@@ -367,7 +759,7 @@ function AdminRecords() {
               </thead>
 
               <tbody>
-                {records.map((record) => (
+                  {filteredRecords.map((record) => (
                   <tr key={record._id} className="border-t align-top">
 
                     <td className="px-6 py-4">{record.pr_po_no}</td>
@@ -566,16 +958,19 @@ function AdminRecords() {
       </select>
     )}
 
-
-  <input
-    type="text"
-    placeholder="Purpose"
-    value={formData.purpose}
-    onChange={(e) =>
-      setFormData({ ...formData, purpose: e.target.value })
-    }
-    className="w-full border p-2 rounded"
-  />
+    <select
+  value={formData.purpose}
+  onChange={(e) =>
+    setFormData({ ...formData, purpose: e.target.value })
+  }
+  className="w-full border p-2 rounded"
+>
+  <option value="">Select Purpose</option>
+  <option value="Objective 1">Objective 1</option>
+  <option value="Objective 2">Objective 2</option>
+  <option value="Objective 3">Objective 3</option>
+  <option value="Regular">Regular</option>
+</select>
   
 
 </div>
@@ -620,11 +1015,17 @@ function AdminRecords() {
   className="w-full border p-2 rounded"
 />
 
-<input
-  type="file"
-  onChange={(e) => setSelectedFile(e.target.files[0])}
-  className="w-full border p-2 rounded"
-/>
+<label className="w-full border p-2 rounded cursor-pointer bg-white flex justify-between items-center">
+  <span className="text-gray-500">
+    {selectedFile ? selectedFile.name : "Choose File"}
+  </span>
+
+  <input
+    type="file"
+    onChange={(e) => setSelectedFile(e.target.files[0])}
+    className="hidden"
+  />
+</label>
 
       <div className="flex justify-end space-x-2">
         <button

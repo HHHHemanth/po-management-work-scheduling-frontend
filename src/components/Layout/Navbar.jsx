@@ -1,7 +1,10 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+
 
 function Navbar() {
   const [logoutModal, setLogoutModal] = useState(false);
+  const navigate = useNavigate();
 
   const handleLogout = () => {
     localStorage.clear();
@@ -38,33 +41,59 @@ function Navbar() {
       letterSpacing: "0.6px",
     }}
   >
-    PO Management System
+    Tech Walnut Project Management System
   </h3>
 </div>
 
-        <button
-  onClick={() => setLogoutModal(true)}
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+
+  {/* Profile Button */}
+ <button
+  onClick={() => navigate("profile")}
   style={{
-    padding: "8px 18px",
-    backgroundColor: "transparent",
-    color: "#f87171",
-    border: "1px solid #f87171",
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    padding: "8px 16px",
+    background: "linear-gradient(135deg, #3b82f6, #2563eb)",
+    color: "white",
+    border: "none",
     borderRadius: "999px",
-    fontWeight: "500",
+    fontWeight: "600",
+    fontSize: "14px",
     cursor: "pointer",
-    transition: "all 0.3s ease"
+    boxShadow: "0 2px 8px rgba(37, 99, 235, 0.4)",
+    transition: "all 0.3s ease",
   }}
   onMouseOver={(e) => {
-    e.target.style.backgroundColor = "#f87171";
-    e.target.style.color = "white";
+    e.target.style.transform = "scale(1.05)";
+    e.target.style.boxShadow = "0 4px 12px rgba(37, 99, 235, 0.6)";
   }}
   onMouseOut={(e) => {
-    e.target.style.backgroundColor = "transparent";
-    e.target.style.color = "#f87171";
+    e.target.style.transform = "scale(1)";
+    e.target.style.boxShadow = "0 2px 8px rgba(37, 99, 235, 0.4)";
   }}
 >
-  Logout
+  👤 Profile
 </button>
+
+  {/* Logout Button */}
+  <button
+    onClick={() => setLogoutModal(true)}
+    style={{
+      padding: "8px 18px",
+      backgroundColor: "transparent",
+      color: "#f87171",
+      border: "1px solid #f87171",
+      borderRadius: "999px",
+      fontWeight: "500",
+      cursor: "pointer",
+    }}
+  >
+    Logout
+  </button>
+
+</div>
 
       </div>
 

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { getRecords } from "../services/recordService";
 
 function AdminDashboard() {
+
   const [records, setRecords] = useState([]);
 
   useEffect(() => {
@@ -19,43 +20,209 @@ function AdminDashboard() {
 
   const totalRecords = records.length;
 
-  const pendingApprovals = records.filter(
-    (record) => record.status === "Pending"
-  ).length;
+  const totalApproval = records.reduce(
+    (sum, r) => sum + (r.approval_rs || 0),
+    0
+  );
+
+  const totalUtilization = records.reduce(
+    (sum, r) => sum + (r.utilization_rs || 0),
+    0
+  );
+
+  const remainingBudget = totalApproval - totalUtilization;
 
   const uniqueStaff = new Set(records.map(r => r.staff_id)).size;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-10">
 
       <h2 className="text-3xl font-bold text-gray-800">
-        Admin Dashboard
+        Dashboard
       </h2>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {/* ================= Budget Overview ================= */}
 
-        <div className="bg-white p-6 rounded-xl shadow">
-          <h3 className="text-gray-500 text-sm">Total Records</h3>
-          <p className="text-2xl font-bold text-blue-600 mt-2">
-            {totalRecords}
-          </p>
+      <div>
+        <h3 className="text-lg font-semibold text-gray-700 mb-4">
+          Budget Overview
+        </h3>
+
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+
+          <div className="bg-white p-6 rounded-xl shadow flex justify-between items-center">
+            <div>
+              <p className="text-gray-500 text-sm">Total Approval</p>
+              <p className="text-2xl font-bold text-blue-600 mt-2">
+                ₹ {totalApproval}
+              </p>
+            </div>
+            <div className="bg-blue-100 text-blue-600 p-3 rounded-lg">
+              📈
+            </div>
+          </div>
+
+          <div className="bg-white p-6 rounded-xl shadow flex justify-between items-center">
+            <div>
+              <p className="text-gray-500 text-sm">Total Utilization</p>
+              <p className="text-2xl font-bold text-green-600 mt-2">
+                ₹ {totalUtilization}
+              </p>
+            </div>
+            <div className="bg-green-100 text-green-600 p-3 rounded-lg">
+              ⏱
+            </div>
+          </div>
+
+          <div className="bg-white p-6 rounded-xl shadow flex justify-between items-center">
+            <div>
+              <p className="text-gray-500 text-sm">Remaining Budget</p>
+              <p className="text-2xl font-bold text-yellow-600 mt-2">
+                ₹ {remainingBudget}
+              </p>
+            </div>
+            <div className="bg-yellow-100 text-yellow-600 p-3 rounded-lg">
+              💰
+            </div>
+          </div>
+
+          <div className="bg-white p-6 rounded-xl shadow flex justify-between items-center">
+            <div>
+              <p className="text-gray-500 text-sm">Total Records</p>
+              <p className="text-2xl font-bold text-purple-600 mt-2">
+                {totalRecords}
+              </p>
+            </div>
+            <div className="bg-purple-100 text-purple-600 p-3 rounded-lg">
+              📄
+            </div>
+          </div>
+
         </div>
-
-        <div className="bg-white p-6 rounded-xl shadow">
-          <h3 className="text-gray-500 text-sm">Total Staff</h3>
-          <p className="text-2xl font-bold text-green-600 mt-2">
-            {uniqueStaff}
-          </p>
-        </div>
-
-        <div className="bg-white p-6 rounded-xl shadow">
-          <h3 className="text-gray-500 text-sm">Pending Approvals</h3>
-          <p className="text-2xl font-bold text-red-600 mt-2">
-            {pendingApprovals}
-          </p>
-        </div>
-
       </div>
+
+      {/* ================= Work Overview ================= */}
+
+      <div>
+        <h3 className="text-lg font-semibold text-gray-700 mb-4">
+          Work Overview
+        </h3>
+
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
+
+          <div className="bg-white p-6 rounded-xl shadow flex justify-between items-center">
+            <div>
+              <p className="text-gray-500 text-sm">Total Works</p>
+              <p className="text-2xl font-bold text-blue-600 mt-2">0</p>
+            </div>
+            <div className="bg-blue-100 text-blue-600 p-3 rounded-lg">
+              📦
+            </div>
+          </div>
+
+          <div className="bg-white p-6 rounded-xl shadow flex justify-between items-center">
+            <div>
+              <p className="text-gray-500 text-sm">Pending</p>
+              <p className="text-2xl font-bold text-gray-600 mt-2">0</p>
+            </div>
+            <div className="bg-gray-100 text-gray-600 p-3 rounded-lg">
+              🕒
+            </div>
+          </div>
+
+          <div className="bg-white p-6 rounded-xl shadow flex justify-between items-center">
+            <div>
+              <p className="text-gray-500 text-sm">In Progress</p>
+              <p className="text-2xl font-bold text-yellow-600 mt-2">0</p>
+            </div>
+            <div className="bg-yellow-100 text-yellow-600 p-3 rounded-lg">
+              📊
+            </div>
+          </div>
+
+          <div className="bg-white p-6 rounded-xl shadow flex justify-between items-center">
+            <div>
+              <p className="text-gray-500 text-sm">Completed</p>
+              <p className="text-2xl font-bold text-green-600 mt-2">0</p>
+            </div>
+            <div className="bg-green-100 text-green-600 p-3 rounded-lg">
+              ✅
+            </div>
+          </div>
+
+          <div className="bg-white p-6 rounded-xl shadow flex justify-between items-center">
+            <div>
+              <p className="text-gray-500 text-sm">Delayed</p>
+              <p className="text-2xl font-bold text-red-600 mt-2">0</p>
+            </div>
+            <div className="bg-red-100 text-red-600 p-3 rounded-lg">
+              ⚠️
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      {/* ================= User Overview ================= */}
+
+      <div>
+        <h3 className="text-lg font-semibold text-gray-700 mb-4">
+          User Overview
+        </h3>
+
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+
+          <div className="bg-white p-6 rounded-xl shadow flex justify-between items-center">
+            <div>
+              <p className="text-gray-500 text-sm">Total Users</p>
+              <p className="text-2xl font-bold text-blue-600 mt-2">
+                {uniqueStaff}
+              </p>
+            </div>
+            <div className="bg-blue-100 text-blue-600 p-3 rounded-lg">
+              👥
+            </div>
+          </div>
+
+          <div className="bg-white p-6 rounded-xl shadow flex justify-between items-center">
+            <div>
+              <p className="text-gray-500 text-sm">Admins</p>
+              <p className="text-2xl font-bold text-purple-600 mt-2">
+                1
+              </p>
+            </div>
+            <div className="bg-purple-100 text-purple-600 p-3 rounded-lg">
+              👑
+            </div>
+          </div>
+
+          <div className="bg-white p-6 rounded-xl shadow flex justify-between items-center">
+            <div>
+              <p className="text-gray-500 text-sm">Staff Members</p>
+              <p className="text-2xl font-bold text-green-600 mt-2">
+                {uniqueStaff}
+              </p>
+            </div>
+            <div className="bg-green-100 text-green-600 p-3 rounded-lg">
+              🧑‍💼
+            </div>
+          </div>
+
+          <div className="bg-white p-6 rounded-xl shadow flex justify-between items-center">
+            <div>
+              <p className="text-gray-500 text-sm">Project Associates</p>
+              <p className="text-2xl font-bold text-yellow-600 mt-2">
+                0
+              </p>
+            </div>
+            <div className="bg-yellow-100 text-yellow-600 p-3 rounded-lg">
+              🛠
+            </div>
+          </div>
+
+        </div>
+      </div>
+
     </div>
   );
 }

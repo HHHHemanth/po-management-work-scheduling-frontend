@@ -82,3 +82,7 @@ export const getDeletedWorks = async () => {
   return res.data;
 };
 
+export const addSuggestion = async (id, data) => {
+  const res = await API.put(`/works/${id}/suggestion`, data);
+  return res.data;
+};

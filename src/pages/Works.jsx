@@ -13,7 +13,9 @@ import {
   updateProgress,
   addDelay,
   updateWork,
-  restoreWork
+  restoreWork,
+  addSuggestion
+  
 } from "../services/workService";
 
 function Works() {
@@ -26,6 +28,7 @@ function Works() {
   const [deleteModal, setDeleteModal] = useState(null);
   const [deletedWorks, setDeletedWorks] = useState([]);
   const [progressModal, setProgressModal] = useState(null);
+  const [suggestionModal, setSuggestionModal] = useState(null);
   const [delayModal, setDelayModal] = useState(null);
   const [inputValue, setInputValue] = useState("");
 
@@ -36,7 +39,8 @@ function Works() {
     task: "",
     description: "",
     allocated_time: "",
-    deadline_time: ""
+    deadline_time: "",
+    due_time_days: ""
   });
 
 
@@ -123,7 +127,8 @@ function Works() {
     task: work.task,
     description: work.description,
     allocated_time: work.allocated_time?.slice(0,16),
-    deadline_time: work.deadline_time?.slice(0,16)
+    deadline_time: work.deadline_time?.slice(0,16),
+    due_time_days: work.due_time_days || ""
   });
   setShowModal(true);
 };
@@ -184,8 +189,10 @@ function Works() {
               <th className="px-6 py-3">Task</th>
               <th className="px-6 py-3">Assigned On</th>
               <th className="px-6 py-3">Deadline</th>
+              <th className="px-6 py-3">Due Time</th>
               <th className="px-6 py-3">Progress</th>
               <th className="px-6 py-3">Delay Reason</th>
+              <th className="px-6 py-3">Suggestions</th>
               <th className="px-6 py-3">Actions</th>
             </tr>
           </thead>
@@ -213,6 +220,10 @@ function Works() {
     : "-"}
 </td>
 
+<td className="px-6 py-4">
+  {`${work.due_time_days ?? 0} days`}
+</td>
+
       <td className="px-6 py-4">
   {work.progress_description || "-"}
 </td>
@@ -227,6 +238,10 @@ function Works() {
   ) : (
     "-"
   )}
+</td>
+
+      <td className="px-6 py-4 text-blue-600 font-medium">
+  {work.suggestion || "-"}
 </td>
 
       {/* ✅ Actions Column */}
@@ -244,7 +259,7 @@ function Works() {
             >
               Progress
             </button>
-
+              
             <button
                 onClick={() => {
                 setDelayModal(work);
@@ -261,6 +276,19 @@ function Works() {
             </button>
           </>
         )}
+
+        {/* STAFF ONLY SUGGEST */}
+{(role === "staff" || role === "admin") && (
+  <button
+    onClick={() => {
+      setSuggestionModal(work);
+      setInputValue("");
+    }}
+    className="text-purple-600"
+  >
+    Suggest
+  </button>
+)}
 
         {/* ADMIN & STAFF ACTIONS */}
         {(role === "admin" || role === "staff") && (
@@ -434,6 +462,56 @@ function Works() {
     </div>
   </div>
 )}
+
+
+      {suggestionModal && (
+  <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+    <div className="bg-white rounded-2xl p-6 w-[420px] space-y-4 shadow-xl">
+
+      <h3 className="text-xl font-semibold text-center">
+        Add Suggestion
+      </h3>
+
+      <input
+        type="text"
+        placeholder="Enter suggestion"
+        value={inputValue}
+        onChange={(e) => setInputValue(e.target.value)}
+        className="w-full border p-2 rounded"
+      />
+
+      <div className="flex justify-center gap-4 pt-4">
+        <button
+          onClick={async () => {
+            try {
+              await addSuggestion(suggestionModal.work_id, {
+                suggestion: inputValue
+              });
+
+              toast.success("Suggestion Added");
+              setSuggestionModal(null);
+              fetchWorks();
+            } catch {
+              toast.error("Failed");
+            }
+          }}
+          className="px-5 py-2 bg-purple-600 text-white rounded-lg"
+        >
+          Save
+        </button>
+
+        <button
+          onClick={() => setSuggestionModal(null)}
+          className="px-5 py-2 bg-gray-300 rounded-lg"
+        >
+          Cancel
+        </button>
+      </div>
+
+    </div>
+  </div>
+)}
+
       {deletedWorks.length > 0 && (
   <>
     <h3 className="text-xl font-semibold mt-10">
@@ -441,6 +519,7 @@ function Works() {
 </h3>
 
 <div className="bg-white shadow rounded-xl overflow-hidden">
+  <div className="max-h-[40vh] overflow-y-auto">  
   
     <table className="min-w-full text-left">
     <thead className="bg-gray-100">
@@ -450,8 +529,10 @@ function Works() {
         <th className="px-6 py-3">Task</th>
         <th className="px-6 py-3">Assigned On</th>
         <th className="px-6 py-3">Deadline</th>
+        
         <th className="px-6 py-3">Progress</th>
         <th className="px-6 py-3">Delay Reason</th>
+        <th className="px-6 py-3">Suggestions</th>
         <th className="px-6 py-3">Actions</th>
       </tr>
     </thead>
@@ -493,28 +574,36 @@ function Works() {
             )}
           </td>
 
-          <td className="px-6 py-4">
-            <button
-              onClick={async () => {
-                try {
-                  await restoreWork(work.work_id);
-                  toast.success("Work Restored");
-                  fetchWorks();
-                } catch {
-                  toast.error("Restore failed");
-                }
-              }}
-              className="text-green-600"
-            >
-              Restore
-            </button>
-          </td>
+          {/* Suggestions column */}
+<td className="px-6 py-4">
+  {work.suggestion || "-"}
+</td>
+
+{/* Actions column */}
+<td className="px-6 py-4">
+  <button
+    onClick={async () => {
+      try {
+        await restoreWork(work.work_id);
+        toast.success("Work Restored");
+        fetchWorks();
+      } catch {
+        toast.error("Restore failed");
+      }
+    }}
+    className="text-green-600 font-medium"
+  >
+    Restore
+  </button>
+</td>
 
         </tr>
       ))}
     </tbody>
   </table>
   </div>
+  </div>
+  
 
     </>
       )}
@@ -577,7 +666,17 @@ function Works() {
     setFormData({ ...formData, deadline_time: e.target.value })
   }
 />
+<label className="text-sm font-medium">Due Time (Days)</label>
 
+<input
+  type="number"
+  placeholder="Enter number of days"
+  className="w-full border p-2 rounded"
+  value={formData.due_time_days}
+  onChange={(e) =>
+    setFormData({ ...formData, due_time_days: e.target.value })
+  }
+/>
             <div className="flex justify-end space-x-2">
               <button
                 onClick={() => setShowModal(false)}
@@ -601,6 +700,8 @@ function Works() {
     </div>
   );
 }
+
+
 
 
 export default Works;

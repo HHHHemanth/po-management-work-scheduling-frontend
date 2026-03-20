@@ -22,6 +22,8 @@ function WorkDocuments() {
   const [confirmModal, setConfirmModal] = useState(false);
   const [selectedDoc, setSelectedDoc] = useState(null);
   const [selectedWorkForDelete, setSelectedWorkForDelete] = useState(null);
+  const [monthFilter, setMonthFilter] = useState("");
+  
 
   useEffect(() => {
     fetchWorks();
@@ -108,6 +110,32 @@ function WorkDocuments() {
     <div className="space-y-6">
 
       <h2 className="text-2xl font-bold">Work Documents</h2>
+      <div className="flex gap-4 items-center">
+  <div className="flex items-center gap-4 bg-blue-50 px-5 py-3 rounded-xl shadow-sm border border-blue-200">
+
+  <span className="text-blue-700 font-semibold text-base">
+    📅 Filter by Month
+  </span>
+
+  <input
+    type="month"
+    value={monthFilter}
+    onChange={(e) => setMonthFilter(e.target.value)}
+    className="px-4 py-2 text-lg rounded-lg border border-blue-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+  />
+
+  {monthFilter && (
+    <button
+      onClick={() => setMonthFilter("")}
+      className="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 text-sm"
+    >
+      Clear
+    </button>
+  )}
+</div>
+
+  
+</div>
 
       <div className="bg-white shadow rounded-xl overflow-hidden">
   <div className="max-h-[60vh] overflow-y-auto">
@@ -123,78 +151,117 @@ function WorkDocuments() {
             </tr>
           </thead>
 
+          
+
           <tbody>
-            {works.map(work => (
-              <tr key={work.work_id} className="border-t align-top">
+{(() => {
 
-                <td className="px-6 py-4 font-medium">
-                  {work.staff_id}
-                </td>
+  const filteredWorks = works.map((work) => {
+  const docs = documentsMap[work.work_id] || [];
 
-                <td className="px-6 py-4">
-                  {work.project_name}
-                </td>
+  const filteredDocs = docs.filter((doc) => {
+    if (!monthFilter) return true;
 
-                <td className="px-6 py-4">
-                  {work.task}
-                </td>
-
-                <td className="px-6 py-4">
-                  {documentsMap[work.work_id]?.length > 0 ? (
-  documentsMap[work.work_id].map((doc) => {
-    console.log("DOCUMENT OBJECT:", doc);
+    const docDate = new Date(doc.uploaded_at);
+    const [year, month] = monthFilter.split("-");
 
     return (
-      <div key={doc.document_id} className="flex gap-4 py-1">
-        <span>{doc.document_name}</span>
-
-        <button
-  onClick={() => window.open(doc.public_url, "_blank")}
-  className="text-blue-600 text-sm"
->
-  VIEW
-</button>
-
-{(role === "admin" || role === "project-associate") && (
-  <button
-    onClick={() => {
-      setSelectedDoc(doc);
-      setSelectedWorkForDelete(work.work_id);
-      setConfirmModal(true);
-    }}
-    className="text-red-600 text-sm"
-  >
-    DELETE
-  </button>
-)}
-
-      </div>
+      docDate.getFullYear() === Number(year) &&
+      docDate.getMonth() === Number(month) - 1
     );
-  })
-) : (
-  <span className="text-gray-500">
-    No Documents
-  </span>
-)}
-                </td>
+  });
 
-                <td className="px-6 py-4">
-                  <button
-                    onClick={() => {
-                      setSelectedWorkId(work.work_id);
-                      setShowUploadModal(true);
-                    }}
-                    className="px-3 py-1 bg-green-600 text-white rounded"
-                  >
-                    Upload
-                  </button>
-                </td>
+  return {
+    ...work,
+    filteredDocs,
+    hasDocsInMonth: filteredDocs.length > 0
+  };
+});
 
-              </tr>
-            ))}
-          </tbody>
+  const worksToShow = monthFilter
+  ? filteredWorks.filter(w => w.hasDocsInMonth)
+  : filteredWorks;
+  
+  if (worksToShow.length === 0) {
+  return (
+    <tr>
+      <td colSpan="5" className="text-center py-6 text-gray-500">
+        No documents found
+      </td>
+    </tr>
+  );
+}
 
-        </table>
+return worksToShow.map((work) => (
+    
+    <tr key={work.work_id} className="border-t align-top">
+
+      <td className="px-6 py-4 font-medium">
+        {work.staff_id}
+      </td>
+
+      <td className="px-6 py-4">
+        {work.project_name}
+      </td>
+
+      <td className="px-6 py-4">
+        {work.task}
+      </td>
+
+      <td className="px-6 py-4">
+        {work.filteredDocs.map((doc) => (
+          <div key={doc.document_id} className="flex gap-3 items-center py-1">
+
+            <span>{doc.document_name}</span>
+
+            <span className="text-xs text-gray-400">
+              {new Date(doc.uploaded_at).toLocaleDateString("en-GB")}
+            </span>
+
+            <button
+              onClick={() => window.open(doc.public_url, "_blank")}
+              className="text-blue-600 text-xs"
+            >
+              VIEW
+            </button>
+
+            {(role === "admin" || role === "project-associate") && (
+              <button
+                onClick={() => {
+                  setSelectedDoc(doc);
+                  setSelectedWorkForDelete(work.work_id);
+                  setConfirmModal(true);
+                }}
+                className="text-red-600 text-xs"
+              >
+                DELETE
+              </button>
+            )}
+
+          </div>
+        ))}
+      </td>
+
+      <td className="px-6 py-4">
+        <button
+          onClick={() => {
+            setSelectedWorkId(work.work_id);
+            setShowUploadModal(true);
+          }}
+          className="px-3 py-1 bg-green-600 text-white rounded"
+        >
+          Upload
+        </button>
+      </td>
+
+    </tr>
+  ));
+})()}
+</tbody>
+ </table>
+
+
+                
         </div>
       </div>
 
