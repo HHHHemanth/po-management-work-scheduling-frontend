@@ -16,6 +16,7 @@ import TrashRecords from "./pages/TrashRecords";
 import Works from "./pages/Works";
 import Profile from "./pages/Profile";
 import WorkDocuments from "./pages/WorkDocuments";
+import ChangePassword from "./pages/ChangePassword";
 
 function App() {
   return (
@@ -53,6 +54,7 @@ function App() {
           <Route path="works" element={<Works />} />
           <Route path="trash" element={<TrashRecords />} />
           <Route path="profile" element={<Profile />} />
+          <Route path="change-password" element={<ChangePassword />} />
         </Route>
 
         <Route
@@ -70,6 +72,7 @@ function App() {
   <Route path="work-documents" element={<WorkDocuments />} />
   <Route path="works" element={<Works />} />
   <Route path="profile" element={<Profile />} />
+  <Route path="change-password" element={<ChangePassword />} />
   
 </Route>
 
@@ -86,6 +89,7 @@ function App() {
   <Route path="works" element={<Works />} />
   <Route path="work-documents" element={<WorkDocuments />} />
   <Route path="profile" element={<Profile />} />
+  <Route path="change-password" element={<ChangePassword />} />
 </Route>
 
 

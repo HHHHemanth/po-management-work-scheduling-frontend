@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { getAllWorks } from "../services/workService";
+import { getAllAssociates } from "../services/associateService";
 import { getRecords } from "../services/recordService";
 
 function AdminDashboard() {
@@ -10,13 +12,20 @@ function AdminDashboard() {
   }, []);
 
   const fetchData = async () => {
-    try {
-      const data = await getRecords();
-      setRecords(data);
-    } catch (error) {
-      console.error("Error fetching dashboard data:", error);
-    }
-  };
+  try {
+    const recordsData = await getRecords();
+    setRecords(recordsData);
+
+    const worksData = await getAllWorks();
+    setWorks(worksData);
+
+    const associatesData = await getAllAssociates();
+    setAssociates(associatesData);
+
+  } catch (error) {
+    console.error("Error fetching dashboard data:", error);
+  }
+};
 
   const totalRecords = records.length;
 
@@ -33,6 +42,23 @@ function AdminDashboard() {
   const remainingBudget = totalApproval - totalUtilization;
 
   const uniqueStaff = new Set(records.map(r => r.staff_id)).size;
+  const [works, setWorks] = useState([]);
+  const [associates, setAssociates] = useState([]);
+  const totalWorks = works.length;
+
+const pending = works.filter(
+  w => !w.progress_description
+).length;
+
+const completed = works.filter(
+  w => w.progress_description?.toLowerCase().includes("complete")
+).length;
+
+const delayed = works.filter(
+  w => w.reason_for_delay && w.reason_for_delay !== ""
+).length;
+
+const inProgress = works.length - (pending + completed + delayed);
 
   return (
     <div className="space-y-10">
@@ -113,7 +139,7 @@ function AdminDashboard() {
           <div className="bg-white p-6 rounded-xl shadow flex justify-between items-center">
             <div>
               <p className="text-gray-500 text-sm">Total Works</p>
-              <p className="text-2xl font-bold text-blue-600 mt-2">0</p>
+              <p className="text-2xl font-bold text-blue-600 mt-2">{totalWorks}</p>
             </div>
             <div className="bg-blue-100 text-blue-600 p-3 rounded-lg">
               📦
@@ -123,7 +149,7 @@ function AdminDashboard() {
           <div className="bg-white p-6 rounded-xl shadow flex justify-between items-center">
             <div>
               <p className="text-gray-500 text-sm">Pending</p>
-              <p className="text-2xl font-bold text-gray-600 mt-2">0</p>
+              <p className="text-2xl font-bold text-gray-600 mt-2">{pending}</p>
             </div>
             <div className="bg-gray-100 text-gray-600 p-3 rounded-lg">
               🕒
@@ -133,7 +159,7 @@ function AdminDashboard() {
           <div className="bg-white p-6 rounded-xl shadow flex justify-between items-center">
             <div>
               <p className="text-gray-500 text-sm">In Progress</p>
-              <p className="text-2xl font-bold text-yellow-600 mt-2">0</p>
+              <p className="text-2xl font-bold text-yellow-600 mt-2">{inProgress}</p>
             </div>
             <div className="bg-yellow-100 text-yellow-600 p-3 rounded-lg">
               📊
@@ -143,7 +169,7 @@ function AdminDashboard() {
           <div className="bg-white p-6 rounded-xl shadow flex justify-between items-center">
             <div>
               <p className="text-gray-500 text-sm">Completed</p>
-              <p className="text-2xl font-bold text-green-600 mt-2">0</p>
+              <p className="text-2xl font-bold text-green-600 mt-2">{completed}</p>
             </div>
             <div className="bg-green-100 text-green-600 p-3 rounded-lg">
               ✅
@@ -153,7 +179,7 @@ function AdminDashboard() {
           <div className="bg-white p-6 rounded-xl shadow flex justify-between items-center">
             <div>
               <p className="text-gray-500 text-sm">Delayed</p>
-              <p className="text-2xl font-bold text-red-600 mt-2">0</p>
+              <p className="text-2xl font-bold text-red-600 mt-2">{delayed}</p>
             </div>
             <div className="bg-red-100 text-red-600 p-3 rounded-lg">
               ⚠️
@@ -212,8 +238,8 @@ function AdminDashboard() {
             <div>
               <p className="text-gray-500 text-sm">Project Associates</p>
               <p className="text-2xl font-bold text-yellow-600 mt-2">
-                0
-              </p>
+  {associates.length}
+</p>
             </div>
             <div className="bg-yellow-100 text-yellow-600 p-3 rounded-lg">
               🛠

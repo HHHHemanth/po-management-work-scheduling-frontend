@@ -52,9 +52,11 @@ function LoginPage() {
     localStorage.setItem("token", token);
     localStorage.setItem("role", role);
 
-    if (role !== "admin") {
-      localStorage.setItem("staff_id", staffId);
-    }
+    if (role === "admin") {
+      localStorage.setItem("staff_id", "admin");
+    } else {
+        localStorage.setItem("staff_id", staffId);
+    }  
 
     if (response.data.name) {
       localStorage.setItem("name", response.data.name);

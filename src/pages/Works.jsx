@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import API from "../services/api";
 import {
   getMyAssociates,
   getAllAssociates
@@ -31,7 +32,54 @@ function Works() {
   const [suggestionModal, setSuggestionModal] = useState(null);
   const [delayModal, setDelayModal] = useState(null);
   const [inputValue, setInputValue] = useState("");
+  const updateTracker = async (work, status) => {
+  try {
+    if (status === "Completed") {
+      await API.put(`/works/${work.work_id}/complete`);
+    }
 
+    else if (status === "Pending") {
+      await API.put(`/works/${work.work_id}/progress-value`, {
+        progress: 0
+      });
+
+      await API.put(`/works/${work.work_id}/progress`, {
+        progress_description: "Pending"
+      });
+    }
+
+    else if (status === "In Progress") {
+      await API.put(`/works/${work.work_id}/progress-value`, {
+        progress: 50
+      });
+
+      await API.put(`/works/${work.work_id}/progress`, {
+        progress_description: "Work in progress"
+      });
+    }
+
+    else if (status === "Delayed") {
+      await API.put(`/works/${work.work_id}/delay`, {
+        reason: "Work delayed"
+      });
+    }
+
+    else if (status === "Extension Requested") {
+  toast.error("Only associates can request extension");
+  return;
+}
+
+    await fetchWorks();
+    toast.success("Status updated");
+
+  } catch (err) {
+    console.error(err);
+    toast.error("Failed to update tracker");
+  }
+
+};
+
+  
   const [formData, setFormData] = useState({
     staff_id: "",
     project_name: "",
@@ -193,6 +241,8 @@ function Works() {
               <th className="px-6 py-3">Progress</th>
               <th className="px-6 py-3">Delay Reason</th>
               <th className="px-6 py-3">Suggestions</th>
+              <th className="px-6 py-3">Tracker</th>
+              <th className="px-6 py-3">Extension</th>
               <th className="px-6 py-3">Actions</th>
             </tr>
           </thead>
@@ -225,9 +275,8 @@ function Works() {
 </td>
 
       <td className="px-6 py-4">
-  {work.progress_description || "-"}
+  {work.progress_description || "No update"}
 </td>
-
       {/* ✅ Delay Reason Column */}
       
       <td className="px-6 py-4">
@@ -243,7 +292,67 @@ function Works() {
       <td className="px-6 py-4 text-blue-600 font-medium">
   {work.suggestion || "-"}
 </td>
+      <td className="px-6 py-4">
 
+  {role === "project-associate" ? (
+    
+    // ✅ ONLY ASSOCIATE CAN EDIT
+    <select
+      className="border px-2 py-1 rounded"
+      value={
+        work.extension_requested
+          ? "Extension Requested"
+          : work.reason_for_delay
+          ? "Delayed"
+          : work.progress === 100
+          ? "Completed"
+          : work.progress > 0
+          ? "In Progress"
+          : "Pending"
+      }
+
+      onChange={(e) => updateTracker(work, e.target.value)}
+    >
+      <option>Pending</option>
+      <option>In Progress</option>
+      <option>Completed</option>
+      <option>Delayed</option>
+      <option>Extension Requested</option>
+    </select>
+
+  ) : (
+
+    // ❌ ADMIN & STAFF → READ ONLY
+    <span className="px-2 py-1 bg-gray-100 rounded text-sm">
+      {work.extension_requested
+        ? "Extension Requested"
+        : work.reason_for_delay
+        ? "Delayed"
+        : work.progress === 100
+        ? "Completed"
+        : work.progress > 0
+        ? "In Progress"
+        : "Pending"}
+    </span>
+
+  )}
+
+</td>
+      <td className="px-6 py-4">
+  {work.extension_requested ? (
+    <span className="px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-sm font-medium">
+      🔵 Extension Requested
+      {work.extension_reason && (
+        <span className="block text-xs text-gray-500 mt-1">
+          {work.extension_reason}
+        </span>
+      )}
+    </span>
+  ) : (
+    "-"
+  )}
+</td>
+  
       {/* ✅ Actions Column */}
       <td className="px-6 py-4 space-x-3">
 
@@ -533,7 +642,9 @@ function Works() {
         <th className="px-6 py-3">Progress</th>
         <th className="px-6 py-3">Delay Reason</th>
         <th className="px-6 py-3">Suggestions</th>
+        <th className="px-6 py-3">Tracker</th>   
         <th className="px-6 py-3">Actions</th>
+        <th className="px-6 py-3">Extension</th>
       </tr>
     </thead>
 
@@ -575,11 +686,23 @@ function Works() {
           </td>
 
           {/* Suggestions column */}
+
 <td className="px-6 py-4">
   {work.suggestion || "-"}
 </td>
 
-{/* Actions column */}
+<td className="px-6 py-4">
+  {work.extension_requested
+    ? "Extension Requested"
+    : work.reason_for_delay
+    ? "Delayed"
+    : work.progress === 100
+    ? "Completed"
+    : work.progress > 0
+    ? "In Progress"
+    : "Pending"}
+</td>
+
 <td className="px-6 py-4">
   <button
     onClick={async () => {
@@ -595,6 +718,21 @@ function Works() {
   >
     Restore
   </button>
+</td>
+
+<td className="px-6 py-4">
+  {work.extension_requested ? (
+    <span className="px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-sm font-medium">
+      🔵 Extension Requested
+      {work.extension_reason && (
+        <span className="block text-xs text-gray-500 mt-1">
+          {work.extension_reason}
+        </span>
+      )}
+    </span>
+  ) : (
+    "-"
+  )}
 </td>
 
         </tr>

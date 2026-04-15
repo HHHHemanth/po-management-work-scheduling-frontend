@@ -31,7 +31,7 @@ function AdminRecords() {
   const [staffs, setStaffs] = useState([]);
   const [showIndentorDropdown, setShowIndentorDropdown] = useState(false);
   const [showBudgetDropdown, setShowBudgetDropdown] = useState(false);
-
+  
 
   const [viewMode, setViewMode] = useState(
     location.state?.viewMode || "records"
@@ -57,7 +57,15 @@ function AdminRecords() {
     created_at: ""
     });
 
-  
+  const handleStatusChange = async (id, status) => {
+  try {
+    await API.put(`/records/${id}`, { status });
+    fetchRecords();
+    toast.success("Status updated");
+  } catch (err) {
+    toast.error("Failed to update status");
+  }
+};
 
   const [editingId, setEditingId] = useState(null);
 
@@ -491,6 +499,7 @@ const totalRemaining = totalApproval - totalUtilization;
 <th className="px-6 py-3 text-sm font-semibold text-gray-600">Utilization ₹</th>
 <th className="px-6 py-3 text-sm font-semibold text-gray-600">Remaining ₹</th>
 <th className="px-6 py-3 text-sm font-semibold text-gray-600">Documents</th>
+<th className="px-6 py-3 text-sm font-semibold text-gray-600">Status</th>
 <th className="px-6 py-3 text-sm font-semibold text-gray-600">Actions</th>
 </tr>
               
@@ -575,7 +584,16 @@ className="mt-2 px-2 py-1 bg-green-600 text-white rounded text-xs"
 Upload
 </button>
 </td>
-
+<td className="px-6 py-4">
+  <select
+    value={record.status || "PR Open"}
+    onChange={(e) => handleStatusChange(record._id, e.target.value)}
+    className="border rounded px-2 py-1"
+  >
+    <option>PR Open</option>
+    <option>PR Closed</option>
+  </select>
+</td>
 {/* ACTION COLUMN */}
 <td className="px-6 py-4 space-x-3">
 
@@ -683,6 +701,16 @@ className="mt-2 px-2 py-1 bg-green-600 text-white rounded text-xs"
 >
 Upload
 </button>
+</td>
+<td className="px-6 py-4">
+  <select
+    value={record.status || "PR Open"}
+    onChange={(e) => handleStatusChange(record._id, e.target.value)}
+    className="border rounded px-2 py-1"
+  >
+    <option>PR Open</option>
+    <option>PR Closed</option>
+  </select>
 </td>
 
 {/* ACTION COLUMN */}
