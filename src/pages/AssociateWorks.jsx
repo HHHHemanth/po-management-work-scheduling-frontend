@@ -114,9 +114,11 @@ const [inputValue, setInputValue] = useState("");
     {work.progress_description || "Not updated"}
   </td>
 
+<td className="px-6 py-4">
   {work.reason_for_delay ? (
-  <span className="text-red-600">{work.reason_for_delay}</span>
-) : "-"}
+    <span className="text-red-600">{work.reason_for_delay}</span>
+  ) : "-"}
+</td>
 
   <td className="px-6 py-4">
     <select
