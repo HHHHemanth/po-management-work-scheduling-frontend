@@ -16,7 +16,7 @@ import TrashRecords from "./pages/TrashRecords";
 import Works from "./pages/Works";
 import Profile from "./pages/Profile";
 import WorkDocuments from "./pages/WorkDocuments";
-import ChangePassword from "./pages/changePassword";
+import ChangePassword from "./pages/ChangePassword";
 
 function App() {
   return (
