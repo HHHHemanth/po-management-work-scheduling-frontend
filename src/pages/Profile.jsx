@@ -1,4 +1,4 @@
-import ChangePassword from "./ChangePassword";
+import ChangePassword from "./changePassword";
 
 function Profile() {
   const name = localStorage.getItem("name");
