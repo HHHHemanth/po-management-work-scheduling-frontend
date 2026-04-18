@@ -199,10 +199,11 @@ function Works() {
         )}
       </div>
 
-      <div className="flex-1 overflow-y-auto space-y-6 pr-2">
+      <div className="flex-1 overflow-auto space-y-6 pr-2">
 
-      <div className="bg-white shadow rounded-xl overflow-hidden">
-        <table className="min-w-full text-left">
+      <div className="bg-white shadow rounded-xl">
+  <div className="overflow-x-auto">
+    <table className="min-w-full text-left">
           <thead className="bg-gray-100">
             <tr>
               <th className="px-6 py-3">Associate ID</th>
@@ -386,7 +387,7 @@ function Works() {
 </tbody>
 
         </table>
-        </div>   {/* closes bg-white shadow div */}
+        </div>   </div>{/* closes bg-white shadow div */}
 </div> 
 
         {deleteModal && (
