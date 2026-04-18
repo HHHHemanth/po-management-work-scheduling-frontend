@@ -86,7 +86,7 @@ function App() {
   }
 > 
   <Route index element={<AssociateDashboard />} />
-  <Route path="works" element={<Works />} />
+  <Route path="works" element={<AssociateWorks />} />
   <Route path="work-documents" element={<WorkDocuments />} />
   <Route path="profile" element={<Profile />} />
   <Route path="change-password" element={<ChangePassword />} />

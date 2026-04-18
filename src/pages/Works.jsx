@@ -34,40 +34,14 @@ function Works() {
   const [inputValue, setInputValue] = useState("");
   const updateTracker = async (work, status) => {
   try {
-    if (status === "Completed") {
-      await API.put(`/works/${work.work_id}/complete`);
+    if (status === "Extension Requested") {
+      toast.error("Only associates can request extension");
+      return;
     }
 
-    else if (status === "Pending") {
-      await API.put(`/works/${work.work_id}/progress-value`, {
-        progress: 0
-      });
-
-      await API.put(`/works/${work.work_id}/progress`, {
-        progress_description: "Pending"
-      });
-    }
-
-    else if (status === "In Progress") {
-      await API.put(`/works/${work.work_id}/progress-value`, {
-        progress: 50
-      });
-
-      await API.put(`/works/${work.work_id}/progress`, {
-        progress_description: "Work in progress"
-      });
-    }
-
-    else if (status === "Delayed") {
-      await API.put(`/works/${work.work_id}/delay`, {
-        reason: "Work delayed"
-      });
-    }
-
-    else if (status === "Extension Requested") {
-  toast.error("Only associates can request extension");
-  return;
-}
+    await API.put(`/works/${work.work_id}/tracker`, {
+      tracker: status
+    });
 
     await fetchWorks();
     toast.success("Status updated");
@@ -76,7 +50,6 @@ function Works() {
     console.error(err);
     toast.error("Failed to update tracker");
   }
-
 };
 
   
@@ -300,16 +273,11 @@ function Works() {
     <select
       className="border px-2 py-1 rounded"
       value={
-        work.extension_requested
-          ? "Extension Requested"
-          : work.reason_for_delay
-          ? "Delayed"
-          : work.progress === 100
-          ? "Completed"
-          : work.progress > 0
-          ? "In Progress"
-          : "Pending"
-      }
+  typeof work.tracker === "object"
+    ? work.tracker?.status || "Pending"
+    : work.tracker || "Pending"
+}
+        
 
       onChange={(e) => updateTracker(work, e.target.value)}
     >
@@ -322,34 +290,27 @@ function Works() {
 
   ) : (
 
-    // ❌ ADMIN & STAFF → READ ONLY
+    // "}
     <span className="px-2 py-1 bg-gray-100 rounded text-sm">
-      {work.extension_requested
-        ? "Extension Requested"
-        : work.reason_for_delay
-        ? "Delayed"
-        : work.progress === 100
-        ? "Completed"
-        : work.progress > 0
-        ? "In Progress"
-        : "Pending"}
-    </span>
-
+  {typeof work.tracker === "object"
+    ? work.tracker?.status || "Pending"
+    : work.tracker || "Pending"}
+</span>
   )}
 
 </td>
       <td className="px-6 py-4">
   {work.extension_requested ? (
-    <span className="px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-sm font-medium">
-      🔵 Extension Requested
-      {work.extension_reason && (
-        <span className="block text-xs text-gray-500 mt-1">
-          {work.extension_reason}
-        </span>
-      )}
-    </span>
+    <div className="flex flex-col">
+      <span className="text-sm font-medium text-gray-800">
+        Extension Requested
+      </span>
+      <span className="text-xs text-gray-500">
+        {work.extension_reason}
+      </span>
+    </div>
   ) : (
-    "-"
+    <span className="text-gray-300">—</span>
   )}
 </td>
   
@@ -722,19 +683,18 @@ function Works() {
 
 <td className="px-6 py-4">
   {work.extension_requested ? (
-    <span className="px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-sm font-medium">
-      🔵 Extension Requested
-      {work.extension_reason && (
-        <span className="block text-xs text-gray-500 mt-1">
-          {work.extension_reason}
-        </span>
-      )}
-    </span>
+    <div className="bg-blue-50 px-3 py-1 rounded-lg inline-block">
+      <div className="text-xs font-semibold text-blue-700">
+        Extension Requested
+      </div>
+      <div className="text-[11px] text-gray-500">
+        {work.extension_reason}
+      </div>
+    </div>
   ) : (
-    "-"
+    <span className="text-gray-300">—</span>
   )}
 </td>
-
         </tr>
       ))}
     </tbody>

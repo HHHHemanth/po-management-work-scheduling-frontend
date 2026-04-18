@@ -59,10 +59,15 @@ function AdminRecords() {
 
   const handleStatusChange = async (id, status) => {
   try {
-    await API.put(`/records/${id}`, { status });
+    await API.put(`/records/${id}/status`, {
+      pr_status: status
+    });
+
     fetchRecords();
-    toast.success("Status updated");
+    toast.success("PR status updated");
+
   } catch (err) {
+    console.error(err.response?.data);
     toast.error("Failed to update status");
   }
 };
@@ -139,13 +144,7 @@ function AdminRecords() {
       utilization_rs: Number(formData.utilization_rs) || 0,
       purpose: formData.purpose,
       staff_id: role === "admin" ? formData.staff_id : staffId,
-      created_at: (() => {
-        const date = new Date(formData.created_at);
-        const day = String(date.getDate()).padStart(2, "0");
-        const month = String(date.getMonth() + 1).padStart(2, "0");
-        const year = date.getFullYear();
-        return `${day}/${month}/${year}`;
-      })()
+      created_at: new Date(formData.created_at).toISOString()
     };
 
     if (editingId) {
@@ -586,12 +585,12 @@ Upload
 </td>
 <td className="px-6 py-4">
   <select
-    value={record.status || "PR Open"}
+    value={record.pr_status || "open"}
     onChange={(e) => handleStatusChange(record._id, e.target.value)}
     className="border rounded px-2 py-1"
   >
-    <option>PR Open</option>
-    <option>PR Closed</option>
+    <option value="open">PR Open</option>
+    <option value="closed">PR Closed</option>
   </select>
 </td>
 {/* ACTION COLUMN */}
@@ -704,12 +703,12 @@ Upload
 </td>
 <td className="px-6 py-4">
   <select
-    value={record.status || "PR Open"}
+    value={record.pr_status || "open"}
     onChange={(e) => handleStatusChange(record._id, e.target.value)}
     className="border rounded px-2 py-1"
   >
-    <option>PR Open</option>
-    <option>PR Closed</option>
+    <option value="open">PR Open</option>
+<option value="closed">PR Closed</option>
   </select>
 </td>
 
