@@ -72,6 +72,53 @@ function AdminRecords() {
   }
 };
 
+const handleFVCDate = async (id, date) => {
+  try {
+    await API.put(`/records/${id}/fvc/date`, {
+      closure_date: date
+    });
+
+    toast.success("FVC date updated");
+    fetchRecords();
+
+  } catch (err) {
+    console.error(err);
+    toast.error("Failed to update date");
+  }
+};
+
+const handleFVCUpload = async (id, file) => {
+  if (!file) return;
+
+  try {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    await API.post(`/records/${id}/fvc/upload`, formData, {
+      headers: { "Content-Type": "multipart/form-data" }
+    });
+
+    toast.success("Uploaded");
+    fetchRecords();
+
+  } catch (err) {
+    console.error(err);
+    toast.error("Upload failed");
+  }
+};
+
+const handleDeleteFVC = async (id) => {
+  try {
+    await API.delete(`/records/${id}/fvc/document`);
+
+    toast.success("Deleted");
+    fetchRecords();
+
+  } catch (err) {
+    toast.error("Delete failed");
+  }
+};
+
   const [editingId, setEditingId] = useState(null);
 
   const role = localStorage.getItem("role");
@@ -98,13 +145,29 @@ function AdminRecords() {
 }, [records]);
 
   const fetchRecords = async () => {
-    try {
-      const data = await getRecords();
-      setRecords(data);
-    } catch (error) {
-      console.error("Error fetching records:", error);
-    }
-  };
+  try {
+    const data = await getRecords();
+
+    const updated = await Promise.all(
+      data.map(async (rec) => {
+        try {
+          const res = await API.get(`/records/${rec._id}/fvc/document`);
+          return {
+            ...rec,
+            fvc: res.data
+          };
+        } catch {
+          return rec;
+        }
+      })
+    );
+
+    setRecords(updated);
+
+  } catch (error) {
+    console.error("Error fetching records:", error);
+  }
+};
 
   const handleDocumentDelete = (recordId, doc) => {
   setDeleteModal({ recordId, doc });
@@ -495,6 +558,7 @@ const totalRemaining = totalApproval - totalUtilization;
   Purpose
 </th>
 <th className="px-6 py-3 text-sm font-semibold text-gray-600">Approval ₹</th>
+<th className="px-6 py-3 text-sm font-semibold text-gray-600">FVC Closure Date </th>
 <th className="px-6 py-3 text-sm font-semibold text-gray-600">Utilization ₹</th>
 <th className="px-6 py-3 text-sm font-semibold text-gray-600">Remaining ₹</th>
 <th className="px-6 py-3 text-sm font-semibold text-gray-600">Documents</th>
@@ -537,6 +601,52 @@ const totalRemaining = totalApproval - totalUtilization;
 </td>
 
 <td className="px-6 py-4">₹ {record.approval_rs}</td>
+
+{/* ✅ FVC COLUMN */}
+<td className="px-6 py-4">
+  <input
+    type="date"
+    value={record.fvc?.closure_date?.split("T")[0] || ""}
+    onChange={(e) =>
+      handleFVCDate(record._id, e.target.value)
+    }
+    className="border rounded px-2 py-1 mb-2"
+  />
+
+  {record.fvc?.document_url && (
+    <div className="flex gap-2 text-xs">
+      <button
+        onClick={() => window.open(record.fvc.document_url)}
+        className="text-blue-600"
+      >
+        View
+      </button>
+
+      <button
+        onClick={() => handleDeleteFVC(record._id)}
+        className="text-red-600"
+      >
+        Delete
+      </button>
+    </div>
+  )}
+
+  <label className="inline-block mt-1">
+  <span className="px-3 py-1 bg-green-600 text-white rounded text-xs cursor-pointer hover:bg-green-700">
+    Upload
+  </span>
+
+  <input
+    type="file"
+    onChange={(e) =>
+      handleFVCUpload(record._id, e.target.files[0])
+    }
+    className="hidden"
+  />
+</label>
+
+
+</td>
 
 <td className="px-6 py-4">₹ {record.utilization_rs}</td>
 
@@ -655,6 +765,51 @@ Delete
 </td>
 
 <td className="px-6 py-4">₹ {record.approval_rs}</td>
+
+{/* ✅ FVC COLUMN */}
+<td className="px-6 py-4">
+  <input
+    type="date"
+    value={record.fvc?.closure_date?.split("T")[0] || ""}
+    onChange={(e) =>
+      handleFVCDate(record._id, e.target.value)
+    }
+    className="border rounded px-2 py-1 mb-2"
+  />
+
+  {record.fvc?.document_url && (
+    <div className="flex gap-2 text-xs">
+      <button
+        onClick={() => window.open(record.fvc.document_url)}
+        className="text-blue-600"
+      >
+        View
+      </button>
+
+      <button
+        onClick={() => handleDeleteFVC(record._id)}
+        className="text-red-600"
+      >
+        Delete
+      </button>
+    </div>
+  )}
+
+  
+  <label className="inline-block mt-1">
+  <span className="px-3 py-1 bg-green-600 text-white rounded text-xs cursor-pointer hover:bg-green-700">
+    Upload
+  </span>
+
+  <input
+    type="file"
+    onChange={(e) =>
+      handleFVCUpload(record._id, e.target.files[0])
+    }
+    className="hidden"
+  />
+</label>
+</td>
 
 <td className="px-6 py-4">₹ {record.utilization_rs}</td>
 

@@ -4,7 +4,7 @@ import { getAllAssociates } from "../services/associateService";
 import { getRecords } from "../services/recordService";
 
 function AdminDashboard() {
-
+  
   const [records, setRecords] = useState([]);
 
   useEffect(() => {
@@ -40,12 +40,27 @@ function AdminDashboard() {
   );
 
   const remainingBudget = totalApproval - totalUtilization;
+  const budgetSummary = {};
+
+records.forEach((r) => {
+  const head = r.project_head || "Unknown";
+
+  if (!budgetSummary[head]) {
+    budgetSummary[head] = {
+      approved: 0,
+      utilized: 0
+    };
+  }
+
+  budgetSummary[head].approved += r.approval_rs || 0;
+  budgetSummary[head].utilized += r.utilization_rs || 0;
+});
 
   const uniqueStaff = new Set(records.map(r => r.staff_id)).size;
   const [works, setWorks] = useState([]);
   const [associates, setAssociates] = useState([]);
   const totalWorks = works.length;
-
+  
 const pending = works.filter(
   w => !w.progress_description
 ).length;
@@ -126,7 +141,41 @@ const inProgress = works.length - (pending + completed + delayed);
 
         </div>
       </div>
+      {/* ================= Budget Head Summary ================= */}
 
+<div>
+  <h3 className="text-lg font-semibold text-gray-700 mb-4">
+    Budget Head Summary
+  </h3>
+
+  <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+
+    {Object.entries(budgetSummary).map(([head, data]) => {
+      const remaining = data.approved - data.utilized;
+
+      return (
+        <div key={head} className="bg-white p-6 rounded-xl shadow">
+
+          <p className="text-gray-500 text-sm mb-1">{head}</p>
+
+          <p className="text-blue-600 font-bold">
+            Approved: ₹ {data.approved}
+          </p>
+
+          <p className="text-red-600 font-bold">
+            Utilized: ₹ {data.utilized}
+          </p>
+
+          <p className="text-green-600 font-bold">
+            Remaining: ₹ {remaining}
+          </p>
+
+        </div>
+      );
+    })}
+
+  </div>
+</div>
       {/* ================= Work Overview ================= */}
 
       <div>
