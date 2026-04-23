@@ -1,28 +1,22 @@
-import { NavLink, Outlet } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 import Navbar from "../components/Layout/Navbar";
-import Sidebar from "../components/Layout/Sidebar";  
+import Sidebar from "../components/Layout/Sidebar";
 
-
-  
-
-  function AdminLayout() {
+function AdminLayout() {
   return (
     <div className="flex h-screen overflow-hidden">
       
-      {/* Sidebar */}
       <Sidebar />
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col">
         <Navbar />
 
-        {/* THIS CONTROLS PAGE SCROLL */}
-        <div className="p-6 bg-gray-100 flex-1 overflow-hidden flex flex-col">
+        {/* ✅ FINAL FIX */}
+        <div className="p-6 bg-gray-100 flex-1 overflow-y-auto min-h-0">
           <Outlet />
         </div>
 
       </div>
-
     </div>
   );
 }
