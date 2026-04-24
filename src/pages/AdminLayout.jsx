@@ -4,7 +4,7 @@ import Sidebar from "../components/Layout/Sidebar";
 
 function AdminLayout() {
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="flex h-screen overflow-auto">
       
       <Sidebar />
 
